@@ -27,7 +27,8 @@ export default {
       return columnTextModes
     },
     textMode (item, key) {
-      const field = this.tableFields.find((field) => field.name === key) || {}
+      const field = this.tableFields.find((field) => field.name.toLowerCase() === key) || {}
+
       let textMode = field.textMode || 'cropped'
       if (field.type === 'dynamic' && field.textModes) {
         const refField = item[field.typeField]
