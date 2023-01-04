@@ -7,4 +7,4 @@ Vue.use(vueResource)
 const prefix = api.path.prefix ? `/${api.path.prefix}` : ''
 
 Vue.http.options.root = `${api.url}${prefix}`
-Vue.http.options.emulateJSON = true
+Vue.http.options.emulateJSON = false

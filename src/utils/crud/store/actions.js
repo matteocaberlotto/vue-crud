@@ -4,7 +4,7 @@ const actions = {
   // table data
   getItems ({ commit, getters, dispatch }) {
     commit('setLoadingStatus', true)
-    Vue.http.get(getters.path('i'))
+    Vue.http.get(getters.path('i') + '.json')
       .then((response) => {
         commit('setItems', response.body)
         commit('setLoadingStatus', false)
@@ -18,7 +18,13 @@ const actions = {
   getItemsServerSide ({ commit, getters, dispatch }, [params]) {
     return new Promise((resolve, reject) => {
       commit('setLoadingStatus', true)
-      Vue.http.post(`${getters.path('i')}/search`, params)
+
+      let url = new URLSearchParams(params)
+      Vue.http.get(`${getters.path('i')}?${url.toString()}`, {
+        headers: {
+          Accept: 'application/ld+json',
+        },
+      })
         .then((response) => {
           commit('setItemsServerSide', response.body)
           resolve()
@@ -35,7 +41,7 @@ const actions = {
   getItem ({ commit, getters, dispatch }, [id]) {
     return new Promise((resolve, reject) => {
       commit('setDetailsLoader', true)
-      Vue.http.get(`${getters.path('sh')}/${id}`)
+      Vue.http.get(`${getters.path('sh')}/${id}.json`)
         .then((response) => {
           commit('setItem', response.body)
           commit('setDetailsLoader', false)
@@ -58,30 +64,31 @@ const actions = {
     errorText,
   ]) {
     return new Promise((resolve, reject) => {
-      Vue.http.put(`${getters.path('u')}/${id}`, params)
+      let _params = params
+      Vue.http.put(`${getters.path('u')}/${id}`, _params)
         .then((response) => {
-          if (response.body.status === 0) {
+          if (response.status === 200) {
             dispatch('openAlertBox', [
               'alertSuccess',
               successText,
             ], { root: true })
             dispatch('runItemsViewRefreshing')
-            resolve()
-          } else if (response.body.status === -1) {
+            resolve(response)
+          } else if (response.body.status === 500) {
             dispatch('openAlertBox', [
               'alertError',
-              response.body.msg,
+              response.body.detail,
             ], { root: true })
-          } else if (response.body.status === -2) {
+          } else if (response.body.status === 400) {
             dispatch('openAlertBox', [
               'alertValidationError',
-              response.body.msg,
+              response.body.detail,
             ], { root: true })
           }
         }, (error) => {
           dispatch('openAlertBox', [
             'alertError',
-            errorText,
+            errorText + ' - Reason: ' + error.body.detail,
           ], { root: true })
           reject(error)
         })
@@ -97,19 +104,19 @@ const actions = {
     return new Promise((resolve, reject) => {
       Vue.http.post(getters.path('st'), params)
         .then((response) => {
-          if (response.body.status === 0) {
+          if (response.status === 201) {
             dispatch('openAlertBox', [
               'alertSuccess',
               successText,
             ], { root: true })
             dispatch('runItemsViewRefreshing')
-            resolve()
-          } else if (response.body.status === -1) {
+            resolve(response)
+          } else if (response.body.status === 500) {
             dispatch('openAlertBox', [
               'alertError',
               response.body.msg,
             ], { root: true })
-          } else if (response.body.status === -2) {
+          } else if (response.body.status === 400) {
             dispatch('openAlertBox', [
               'alertValidationError',
               response.body.msg,
@@ -125,7 +132,7 @@ const actions = {
         }, (error) => {
           dispatch('openAlertBox', [
             'alertError',
-            errorText,
+            errorText + ' - Reason: ' + error.body.detail,
           ], { root: true })
           reject(error)
         })
@@ -145,10 +152,10 @@ const actions = {
           successText,
         ], { root: true })
         dispatch('runItemsViewRefreshing')
-      }, () => {
+      }, (error) => {
         dispatch('openAlertBox', [
           'alertError',
-          errorText,
+          errorText + ' - Reason: ' + error.body.detail,
         ], { root: true })
       })
   },
@@ -159,17 +166,17 @@ const actions = {
     successText,
     errorText,
   ]) {
-    Vue.http.post(`${getters.path('mu')}/multiple-update`, params)
+    Vue.http.put(`${getters.path('mu')}/multiple`, params)
       .then(() => {
         dispatch('openAlertBox', [
           'alertSuccess',
           successText,
         ], { root: true })
         dispatch('runItemsViewRefreshing')
-      }, () => {
+      }, (error) => {
         dispatch('openAlertBox', [
           'alertError',
-          errorText,
+          errorText + ' - Reason: ' + error.body.detail,
         ], { root: true })
       })
   },
@@ -187,10 +194,10 @@ const actions = {
           successText,
         ], { root: true })
         dispatch('runItemsViewRefreshing')
-      }, () => {
+      }, (error) => {
         dispatch('openAlertBox', [
           'alertError',
-          errorText,
+          errorText + ' - Reason: ' + error.body.detail,
         ], { root: true })
       })
   },
@@ -214,10 +221,10 @@ const actions = {
           successText,
         ], { root: true })
         dispatch('getItemElements')
-      }, () => {
+      }, (error) => {
         dispatch('openAlertBox', [
           'alertError',
-          errorText,
+          errorText + ' - Reason: ' + error.body.detail,
         ], { root: true })
       })
   },
