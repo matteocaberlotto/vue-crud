@@ -275,6 +275,9 @@ export default {
     tableFields () {
       return this.fieldsInfo.filter(field => field.table !== false && field.type !== 'divider')
     },
+    filterFields () {
+      return this.fieldsInfo.filter(field => (field.table !== false || field.filters) && field.type !== 'divider')
+    },
     detailsFields () {
       return this.fieldsInfo.filter(field => field.details !== false && field.type !== 'divider')
     },

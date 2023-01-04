@@ -9,6 +9,7 @@ export default {
   props: [
     'itemsViewConfig',
     'tableFields',
+    'filterFields',
     'deleteMode',
     'customButtons',
     'itemElements',

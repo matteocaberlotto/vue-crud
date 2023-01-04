@@ -34,7 +34,7 @@ export default {
     },
   },
   created () {
-    this.columnFilters = this.tableFields.map((field) => {
+    this.columnFilters = this.filterFields.map((field) => {
       const item = {}
       item.mode = 'like'
       item.text = field.text
